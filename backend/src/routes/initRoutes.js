@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { initializeDatabase, fillSampleData } = require('../controllers/initController');
+const { initializeDatabase, fillSampleData, updateTenant } = require('../controllers/initController');
 
 const router = Router();
 
@@ -11,5 +11,9 @@ router.post('/initialize', initializeDatabase);
 // Create demo/sample records (customers, products, orders, events)
 // Optional query param: tenantId to target a specific tenant
 router.get('/sample', fillSampleData);
+
+// Update tenant with real Shopify credentials
+// Query params: shopDomain, accessToken (optional: tenantId)
+router.get('/update-tenant', updateTenant);
 
 module.exports = router;

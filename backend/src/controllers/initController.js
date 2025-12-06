@@ -136,7 +136,61 @@ const fillSampleData = async (req, res) => {
   }
 };
 
+/**
+ * Update tenant with real Shopify credentials
+ * Query params: shopDomain, accessToken
+ * Example: GET /api/init/update-tenant?shopDomain=mystore.myshopify.com&accessToken=shpat_xxxxx
+ */
+const updateTenant = async (req, res) => {
+  try {
+    logger.info('🔧 Update tenant endpoint called');
+
+    const { shopDomain, accessToken, tenantId } = req.query;
+
+    if (!shopDomain || !accessToken) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Missing required params: shopDomain, accessToken',
+        example: '/api/init/update-tenant?shopDomain=mystore.myshopify.com&accessToken=shpat_xxxxx'
+      });
+    }
+
+    let tenant;
+    if (tenantId) {
+      tenant = await Tenant.findByPk(tenantId);
+    } else {
+      tenant = await Tenant.findOne();
+    }
+
+    if (!tenant) {
+      return res.status(404).json({ status: 'error', message: 'Tenant not found' });
+    }
+
+    // Update tenant with real Shopify credentials
+    tenant.shopDomain = shopDomain;
+    tenant.accessToken = accessToken;
+    await tenant.save();
+
+    logger.info(`✅ Tenant updated: shopDomain=${shopDomain}`);
+
+    return res.json({
+      status: 'ok',
+      message: 'Tenant updated with real Shopify credentials',
+      tenant: {
+        id: tenant.id,
+        name: tenant.name,
+        shopDomain: tenant.shopDomain,
+        adminEmail: tenant.adminEmail
+      }
+    });
+  } catch (error) {
+    logger.error('❌ Update tenant failed:', error.message);
+    return res.status(500).json({ status: 'error', message: 'Update failed', error: error.message });
+  }
+};
+
 module.exports = {
   initializeDatabase,
-  fillSampleData
+  fillSampleData,
+  updateTenant
 };

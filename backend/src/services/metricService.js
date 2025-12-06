@@ -57,7 +57,44 @@ const getOrdersByDate = async (tenantId, startDate, endDate) => {
     order: [[fn('DATE', col('processedAt')), 'ASC']]
   });
 
-  return rows.map((row) => row.get({ plain: true }));
+  // If a date range was provided, return a zero-filled series for every day in the range
+  const plainRows = rows.map((row) => row.get({ plain: true }));
+  if (startDate || endDate) {
+    // build inclusive date array
+    const start = startDate ? new Date(startDate) : new Date();
+    const end = endDate ? new Date(endDate) : new Date();
+    // normalize time to UTC midnight to match DATE() output
+    const toYMD = (d) => {
+      const yy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yy}-${mm}-${dd}`;
+    };
+
+    const days = [];
+    const cur = new Date(Date.UTC(start.getFullYear(), start.getMonth(), start.getDate()));
+    const last = new Date(Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()));
+    while (cur <= last) {
+      days.push(toYMD(cur));
+      cur.setUTCDate(cur.getUTCDate() + 1);
+    }
+
+    const rowMap = new Map(plainRows.map((r) => [String(r.date), r]));
+    return days.map((d) => {
+      const r = rowMap.get(d);
+      return {
+        date: d,
+        orderCount: r ? Number(r.orderCount) || 0 : 0,
+        totalSales: r ? Number(r.totalSales) || 0 : 0
+      };
+    });
+  }
+
+  return plainRows.map((r) => ({
+    date: String(r.date),
+    orderCount: Number(r.orderCount) || 0,
+    totalSales: Number(r.totalSales) || 0
+  }));
 };
 
 const getTopCustomers = async (tenantId, limit = 5) => {

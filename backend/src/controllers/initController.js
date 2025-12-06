@@ -239,6 +239,57 @@ const clearTenantData = async (req, res) => {
   }
 };
 
+/**
+ * Detect demo tenants (created by initializer) and remove their demo records only
+ * Criteria: shopDomain === 'test-store.myshopify.com' OR accessToken contains 'shpat_test' OR adminEmail == 'admin@teststore.com'
+ */
+const cleanDemoData = async (req, res) => {
+  try {
+    logger.info('🔧 Clean demo data endpoint called');
+
+    const { Tenant: TenantModel, Customer, Product, Order, CustomEvent } = require('../models');
+    const { Op } = require('sequelize');
+
+    const demoTenants = await TenantModel.findAll({
+      where: {
+        [Op.or]: [
+          { shopDomain: 'test-store.myshopify.com' },
+          { accessToken: { [Op.like]: '%shpat_test%' } },
+          { adminEmail: 'admin@teststore.com' }
+        ]
+      }
+    });
+
+    if (!demoTenants || demoTenants.length === 0) {
+      return res.json({ status: 'ok', message: 'No demo tenants found', cleared: {} });
+    }
+
+    let totals = { customers: 0, orders: 0, products: 0, events: 0, tenants: demoTenants.length };
+
+    for (const tenant of demoTenants) {
+      const tid = tenant.id;
+      const [customersDeleted, ordersDeleted, productsDeleted, eventsDeleted] = await Promise.all([
+        Customer.destroy({ where: { tenantId: tid } }),
+        Order.destroy({ where: { tenantId: tid } }),
+        Product.destroy({ where: { tenantId: tid } }),
+        CustomEvent.destroy({ where: { tenantId: tid } })
+      ]);
+
+      totals.customers += customersDeleted;
+      totals.orders += ordersDeleted;
+      totals.products += productsDeleted;
+      totals.events += eventsDeleted;
+    }
+
+    logger.info(`✅ Cleaned demo data for ${demoTenants.length} tenant(s)`);
+
+    return res.json({ status: 'ok', message: 'Demo data cleaned', cleared: totals });
+  } catch (error) {
+    logger.error('❌ Clean demo data failed:', error.message);
+    return res.status(500).json({ status: 'error', message: 'Clean demo failed', error: error.message });
+  }
+};
+
 module.exports = {
   initializeDatabase,
   fillSampleData,

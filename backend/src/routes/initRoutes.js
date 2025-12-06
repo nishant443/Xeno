@@ -20,4 +20,12 @@ router.get('/update-tenant', updateTenant);
 // Optional query param: tenantId
 router.get('/clear-data', clearTenantData);
 
+// Clean demo records for tenants created by initializer
+// This removes only demo tenant records (based on shopDomain/accessToken/adminEmail)
+router.get('/clean-demo', (req, res) => {
+	// route wiring will call controller
+	const { cleanDemoData } = require('../controllers/initController');
+	return cleanDemoData(req, res);
+});
+
 module.exports = router;

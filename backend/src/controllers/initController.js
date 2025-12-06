@@ -294,5 +294,6 @@ module.exports = {
   initializeDatabase,
   fillSampleData,
   updateTenant,
-  clearTenantData
+  clearTenantData,
+  cleanDemoData
 };

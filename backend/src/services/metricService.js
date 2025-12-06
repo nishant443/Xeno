@@ -39,10 +39,16 @@ const getOrdersByDate = async (tenantId, startDate, endDate) => {
   if (startDate || endDate) {
     where.processedAt = {};
     if (startDate) {
-      where.processedAt[Op.gte] = new Date(startDate);
+      // Start of day (00:00:00)
+      const s = new Date(startDate);
+      s.setUTCHours(0, 0, 0, 0);
+      where.processedAt[Op.gte] = s;
     }
     if (endDate) {
-      where.processedAt[Op.lte] = new Date(endDate);
+      // End of day (23:59:59.999)
+      const e = new Date(endDate);
+      e.setUTCHours(23, 59, 59, 999);
+      where.processedAt[Op.lte] = e;
     }
   }
 

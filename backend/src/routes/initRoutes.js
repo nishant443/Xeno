@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { initializeDatabase, fillSampleData, updateTenant } = require('../controllers/initController');
+const { initializeDatabase, fillSampleData, updateTenant, clearTenantData } = require('../controllers/initController');
 
 const router = Router();
 
@@ -15,5 +15,9 @@ router.get('/sample', fillSampleData);
 // Update tenant with real Shopify credentials
 // Query params: shopDomain, accessToken (optional: tenantId)
 router.get('/update-tenant', updateTenant);
+
+// Clear all data for a tenant (customers, orders, products, events)
+// Optional query param: tenantId
+router.get('/clear-data', clearTenantData);
 
 module.exports = router;

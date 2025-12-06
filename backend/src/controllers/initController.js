@@ -189,8 +189,59 @@ const updateTenant = async (req, res) => {
   }
 };
 
+/**
+ * Clear all data for a tenant (customers, orders, products, events)
+ * Useful when switching from demo to real data
+ * Query param (optional): tenantId
+ */
+const clearTenantData = async (req, res) => {
+  try {
+    logger.info('🔧 Clear tenant data endpoint called');
+
+    const { tenantId } = req.query;
+
+    let tenant;
+    if (tenantId) {
+      tenant = await Tenant.findByPk(tenantId);
+    } else {
+      tenant = await Tenant.findOne();
+    }
+
+    if (!tenant) {
+      return res.status(404).json({ status: 'error', message: 'Tenant not found' });
+    }
+
+    const { Customer, Product, Order, CustomEvent } = require('../models');
+
+    // Delete all records for this tenant
+    const [customersDeleted, ordersDeleted, productsDeleted, eventsDeleted] = await Promise.all([
+      Customer.destroy({ where: { tenantId: tenant.id } }),
+      Order.destroy({ where: { tenantId: tenant.id } }),
+      Product.destroy({ where: { tenantId: tenant.id } }),
+      CustomEvent.destroy({ where: { tenantId: tenant.id } })
+    ]);
+
+    logger.info(`✅ Cleared tenant data: customers=${customersDeleted}, orders=${ordersDeleted}, products=${productsDeleted}, events=${eventsDeleted}`);
+
+    return res.json({
+      status: 'ok',
+      message: 'All tenant data cleared',
+      cleared: {
+        customers: customersDeleted,
+        orders: ordersDeleted,
+        products: productsDeleted,
+        events: eventsDeleted
+      }
+    });
+  } catch (error) {
+    logger.error('❌ Clear tenant data failed:', error.message);
+    return res.status(500).json({ status: 'error', message: 'Clear failed', error: error.message });
+  }
+};
+
 module.exports = {
   initializeDatabase,
   fillSampleData,
-  updateTenant
+  updateTenant,
+  clearTenantData
 };

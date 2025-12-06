@@ -2,6 +2,7 @@ import Loader from '../components/common/Loader.jsx';
 import useFetch from '../hooks/useFetch.js';
 import * as dashboardService from '../services/dashboardService.js';
 import { btnOutlineClass, panelClass } from '../utils/styles.js';
+import { formatCurrency } from '../utils/formatters.js';
 
 const Customers = () => {
   const { data: customers, loading, error, refetch } = useFetch(dashboardService.getCustomers, []);
@@ -40,11 +41,15 @@ const Customers = () => {
             className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white/80 px-4 py-3 shadow-sm"
           >
             <div>
-              <p className="font-semibold text-slate-900">{customer.name}</p>
-              <small className="text-xs text-slate-400">{customer.id}</small>
+              <p className="font-semibold text-slate-900">
+                {customer.name || (customer.firstName || customer.lastName
+                  ? `${customer.firstName || ''} ${customer.lastName || ''}`.trim()
+                  : customer.email || `Customer ${customer.id}`)}
+              </p>
+              <small className="text-xs text-slate-400">{customer.email || customer.name || customer.id}</small>
             </div>
             <div className="text-right">
-              <p className="font-semibold text-slate-900">${Number(customer.total || 0).toFixed(2)}</p>
+              <p className="font-semibold text-slate-900">{formatCurrency(customer.total || customer.totalSpent)}</p>
               <small className="text-xs text-slate-400">{new Date(customer.updatedAt).toLocaleString()}</small>
             </div>
           </li>

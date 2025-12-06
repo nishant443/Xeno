@@ -22,20 +22,23 @@ const number = (value, fallback) => {
 const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: number(process.env.PORT, 4000),
-  jwtSecret: process.env.JWT_SECRET || 'dev_secret',
+
   db: {
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST,
     port: number(process.env.DB_PORT, 3306),
-    name: process.env.DB_NAME || 'xeno',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || ''
+    name: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD
   },
+
   shopify: {
-    apiKey: process.env.SHOPIFY_API_KEY || '',
-    apiSecret: process.env.SHOPIFY_API_SECRET || '',
-    accessToken: process.env.SHOPIFY_ACCESS_TOKEN || ''
+    apiKey: process.env.SHOPIFY_API_KEY,
+    apiSecret: process.env.SHOPIFY_API_SECRET,
+    accessToken: process.env.SHOPIFY_ACCESS_TOKEN
   },
-  webhookSecret: process.env.WEBHOOK_SECRET || ''
+
+  webhookSecret: process.env.WEBHOOK_SECRET,
+  jwtSecret: process.env.JWT_SECRET || 'dev_secret'
 };
 
 module.exports = config;

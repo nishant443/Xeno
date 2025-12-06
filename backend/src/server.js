@@ -8,9 +8,13 @@ const start = async () => {
   try {
     await sequelize.authenticate();
     await sequelize.sync();
-    app.listen(env.port, () => {
-      logger.info(`Server listening on http://localhost:${env.port}`);
+
+    const PORT = process.env.PORT || env.port;
+
+    app.listen(PORT, () => {
+      logger.info(`Server listening on http://localhost:${PORT}`);
     });
+
     scheduleIngestionJobs();
   } catch (error) {
     logger.error(`Failed to start server: ${error.message}`);

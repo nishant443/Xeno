@@ -1,10 +1,13 @@
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api',
-  timeout: 10000
+  baseURL: API_BASE,
+  timeout: 10000,
 });
 
+// Attach token automatically
 api.interceptors.request.use((config) => {
   const stored = localStorage.getItem('xeno-auth');
   if (stored) {

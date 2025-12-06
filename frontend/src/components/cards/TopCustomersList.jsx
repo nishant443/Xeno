@@ -13,14 +13,15 @@ const TopCustomersList = ({ customers }) => (
         >
           <div>
             <p className="font-semibold text-slate-900">
-              {customer.firstName || customer.lastName
-                ? `${customer.firstName || ''} ${customer.lastName || ''}`.trim()
-                : customer.email || `Customer ${customer.id}`}
+              {customer.name
+                || (customer.firstName || customer.lastName
+                  ? `${customer.firstName || ''} ${customer.lastName || ''}`.trim()
+                  : customer.email || `Customer ${customer.id}`)}
             </p>
-            <small className="text-sm text-slate-400">{customer.email || 'No email'}</small>
+            <small className="text-sm text-slate-400">{customer.email || customer.name || 'No email'}</small>
           </div>
           <div className="text-right">
-            <p className="font-semibold text-slate-900">{formatCurrency(customer.totalSpent)}</p>
+            <p className="font-semibold text-slate-900">{formatCurrency(customer.total ?? customer.totalSpent)}</p>
             <small className="text-sm text-slate-400">Lifetime spend</small>
           </div>
         </li>

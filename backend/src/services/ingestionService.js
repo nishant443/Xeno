@@ -30,8 +30,19 @@ const ingestTenantData = async (tenantId) => {
   await upsertRecords(Customer, customers, (customer) => ({
     id: customer.id,
     tenantId: tenant.id,
-    firstName: customer.first_name,
-    lastName: customer.last_name,
+    firstName: customer.first_name || (() => {
+      if (customer.name) {
+        return customer.name.split(' ')[0] || null;
+      }
+      return null;
+    })(),
+    lastName: customer.last_name || (() => {
+      if (customer.name) {
+        const parts = customer.name.split(' ');
+        return parts.length > 1 ? parts.slice(1).join(' ') : null;
+      }
+      return null;
+    })(),
     email: customer.email,
     totalSpent: customer.total_spent
   }));

@@ -111,6 +111,16 @@ const Dashboard = () => {
     }))
   ), [topCustomers]);
 
+  const revenueData = useMemo(() => {
+    if (ordersTrend && ordersTrend.length) {
+      return ordersTrend.map((row) => ({
+        name: row.date,
+        value: Number(row['Total Sales'] || row.totalSales || 0)
+      }));
+    }
+    return deriveChartSeries(stats.totalSales, 'Revenue');
+  }, [ordersTrend, stats.totalSales]);
+
   if (loading) {
     return <Loader />;
   }
@@ -223,7 +233,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <RevenueChart data={deriveChartSeries(stats.totalSales, 'Revenue')} />
+        <RevenueChart data={revenueData} />
         <EventFunnelChart data={eventData} />
       </div>
 

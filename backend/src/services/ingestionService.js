@@ -51,9 +51,9 @@ const ingestTenantData = async (tenantId) => {
     id: order.id,
     tenantId: tenant.id,
     customerId: order.customer?.id ?? null,
-    totalPrice: order.total_price,
-    currency: order.currency,
-    processedAt: order.processed_at
+    totalPrice: Number(order.total_price || order.current_total_price || 0),
+    currency: order.currency || order.currency_iso_code || 'USD',
+    processedAt: order.processed_at || order.created_at
   }));
 
   await upsertRecords(Product, products, (product) => ({
